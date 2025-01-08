@@ -50,7 +50,7 @@ jobs:
           gh api \
           -H "Accept: application/vnd.github+json" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          /repos/${{ github.repository_owner }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
