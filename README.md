@@ -1,2 +1,2 @@
 # errorllmaction
-Console output is send to llm when CI job fails 
+Console output is sent to LLM when CI job fails.

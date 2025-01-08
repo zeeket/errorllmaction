@@ -1,0 +1,57 @@
+name: Create and publish a Docker image
+on:
+  push:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/errorllmaction
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          file: Dockerfile
+
+  send-error:
+    runs-on: ubuntu-latest
+    needs: build-and-push-image
+    steps:
+      - name: Print this workflow run's ID
+        run: "echo 'Workflow run ID: ${{ github.run_id }}'"
+        
+      - name: Get the API response for this workflow run
+        run: |
+          gh api 
+          -H "Accept: application/vnd.github+json" 
+          -H "X-GitHub-Api-Version: 2022-11-28"
+          /repos/${{ github.repository_owner }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
